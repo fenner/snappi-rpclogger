@@ -18,7 +18,7 @@ on:
         default: true
         type: boolean
       skip_openapi_validation:
-        description: Skip the final OpenAPI specification validation to allow invalid spec to still be converted
+        description: Skip the final OpenAPI specification validation to allow a spec with validation errors to still be converted
         required: false
         default: false
         type: boolean

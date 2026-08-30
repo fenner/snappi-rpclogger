@@ -1,4 +1,4 @@
-name: Generate SDK
+name: Internal: Generate SDK
 
 on:
   workflow_call:
@@ -32,7 +32,7 @@ jobs:
       group: snappi-rpclogger-release-${{ inputs.models_tag }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
@@ -45,10 +45,10 @@ jobs:
           ! git rev-parse -q --verify "refs/tags/$MODELS_TAG" >/dev/null || { echo "Tag $MODELS_TAG already exists" >&2; exit 1; }
           release_branch="rpclogger-$MODELS_TAG"
           ! git ls-remote --exit-code --heads origin "$release_branch" >/dev/null || { echo "Branch $release_branch already exists" >&2; exit 1; }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: "1.25.x"
       - name: Install generator prerequisites
@@ -77,7 +77,7 @@ jobs:
           python -c 'import snappi'
       - name: Upload dry-run output
         if: inputs.dry_run
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: generated-sdk-${{ inputs.models_tag }}
           path: |
@@ -94,7 +94,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           release_branch="rpclogger-$MODELS_TAG"
           git switch --orphan "$release_branch"
-          git rm --recursive --force .
+          git rm -r --force .
           git add gosnappi snappi requirements.txt build-info.json
           git commit -m "Generate RPC logger SDK for $MODELS_TAG"
           git tag --annotate "$MODELS_TAG" --message "RPC logger SDK for models $MODELS_TAG"
