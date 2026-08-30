@@ -1,0 +1,9 @@
+.git
+.build
+artifacts
+gosnappi
+snappi
+requirements.txt
+build-info.json
+__pycache__
+*.pyc
