@@ -13,12 +13,12 @@ on:
         default: rpclogger-builder
         type: string
       dry_run:
-        description: Generate, test, and upload artifacts without committing, tagging, or releasing
+        description: Dry run - generate, test, and upload artifacts without committing, tagging, or releasing
         required: false
         default: true
         type: boolean
       skip_openapi_validation:
-        description: Skip only the final OpenAPI specification validation (other generation checks still run)
+        description: Skip the final OpenAPI specification validation to allow invalid spec to still be converted
         required: false
         default: false
         type: boolean
@@ -26,87 +26,12 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: snappi-rpclogger-release-${{ inputs.models_tag }}
-  cancel-in-progress: false
-
 jobs:
   generate:
-    runs-on: ubuntu-24.04
-    # OpenApiArt's whole-module goimports pass can consume more than 60 CPU
-    # minutes for a full Models release; retain the hosted-runner maximum.
-    timeout-minutes: 360
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-      - name: Reject an existing tag
-        env:
-          MODELS_TAG: ${{ inputs.models_tag }}
-        run: |
-          [[ "$MODELS_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]] || { echo "models_tag must look like v1.61.0" >&2; exit 2; }
-          git fetch --tags origin
-          ! git rev-parse -q --verify "refs/tags/$MODELS_TAG" >/dev/null || { echo "Tag $MODELS_TAG already exists" >&2; exit 1; }
-          release_branch="rpclogger-$MODELS_TAG"
-          ! git ls-remote --exit-code --heads origin "$release_branch" >/dev/null || { echo "Branch $release_branch already exists" >&2; exit 1; }
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.25.x"
-      - name: Install generator prerequisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes libprotobuf-dev protobuf-compiler
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
-          go install golang.org/x/tools/cmd/goimports@v0.36.0
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-      - name: Generate SDK
-        env:
-          SKIP_OPENAPI_VALIDATION: ${{ inputs.skip_openapi_validation }}
-        run: |
-          python -m pip install --upgrade pip
-          arguments=()
-          if [[ "$SKIP_OPENAPI_VALIDATION" == true ]]; then
-            arguments+=(--skip-openapi-validation)
-          fi
-          python scripts/generate.py --models-tag "${{ inputs.models_tag }}" --openapiart-ref "${{ inputs.openapiart_ref }}" "${arguments[@]}"
-      - name: Test generated Go module
-        run: go -C gosnappi test ./...
-      - name: Test generated Python package
-        run: |
-          python -m pip install -r requirements.txt
-          python -c 'import snappi'
-      - name: Upload dry-run output
-        if: inputs.dry_run
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-sdk-${{ inputs.models_tag }}
-          path: |
-            gosnappi
-            snappi
-            requirements.txt
-            build-info.json
-      - name: Create generated branch, tag, and push
-        if: inputs.dry_run == false
-        env:
-          MODELS_TAG: ${{ inputs.models_tag }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          release_branch="rpclogger-$MODELS_TAG"
-          git switch --orphan "$release_branch"
-          git rm --recursive --force .
-          git add gosnappi snappi requirements.txt build-info.json
-          git commit -m "Generate RPC logger SDK for $MODELS_TAG"
-          git tag --annotate "$MODELS_TAG" --message "RPC logger SDK for models $MODELS_TAG"
-          git push --atomic origin "HEAD:refs/heads/$release_branch" "refs/tags/$MODELS_TAG"
-      - name: Publish GitHub release
-        if: inputs.dry_run == false
-        env:
-          GH_TOKEN: ${{ github.token }}
-          MODELS_TAG: ${{ inputs.models_tag }}
-        run: gh release create "$MODELS_TAG" --title "$MODELS_TAG" --generate-notes
+    uses: ./.github/workflows/generate-sdk.yml
+    with:
+      models_tag: ${{ inputs.models_tag }}
+      openapiart_ref: ${{ inputs.openapiart_ref }}
+      dry_run: ${{ inputs.dry_run }}
+      skip_openapi_validation: ${{ inputs.skip_openapi_validation }}
+    secrets: inherit
