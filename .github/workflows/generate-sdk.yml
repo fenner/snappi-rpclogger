@@ -1,4 +1,4 @@
-name: Internal: Generate SDK
+name: Internal - Generate SDK
 
 on:
   workflow_call:
