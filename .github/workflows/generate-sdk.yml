@@ -94,7 +94,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           release_branch="rpclogger-$MODELS_TAG"
           git switch --orphan "$release_branch"
-          git rm -r --force .
           git add gosnappi snappi requirements.txt build-info.json
           git commit -m "Generate RPC logger SDK for $MODELS_TAG"
           git tag --annotate "$MODELS_TAG" --message "RPC logger SDK for models $MODELS_TAG"
