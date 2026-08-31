@@ -1,0 +1,52 @@
+name: Poll OTG models releases
+
+on:
+  schedule:
+    # A non-zero minute reduces delays from the top-of-hour schedule rush.
+    - cron: "17 09 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  latest-models-release:
+    runs-on: ubuntu-24.04
+    outputs:
+      models_tag: ${{ steps.latest.outputs.models_tag }}
+      needs_generation: ${{ steps.present.outputs.needs_generation }}
+    steps:
+      - name: Get latest upstream Models release
+        id: latest
+        env:
+          UPSTREAM_RELEASE_API: https://api.github.com/repos/open-traffic-generator/models/releases/latest
+        run: |
+          models_tag="$(curl --fail --silent --show-error --location "$UPSTREAM_RELEASE_API" | jq --raw-output '.tag_name')"
+          [[ "$models_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]] || { echo "Unexpected upstream release tag: $models_tag" >&2; exit 1; }
+          echo "models_tag=$models_tag" >> "$GITHUB_OUTPUT"
+      - name: Check whether the tag is already generated
+        id: present
+        env:
+          MODELS_TAG: ${{ steps.latest.outputs.models_tag }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/$REPOSITORY/git/ref/tags/$MODELS_TAG" >/dev/null 2>&1; then
+            echo "Release tag $MODELS_TAG already exists"
+            echo "needs_generation=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release tag $MODELS_TAG is not present"
+            echo "needs_generation=true" >> "$GITHUB_OUTPUT"
+          fi
+  generate:
+    needs: latest-models-release
+    if: needs.latest-models-release.outputs.needs_generation == 'true'
+    uses: ./.github/workflows/generate-sdk.yml
+    with:
+      models_tag: ${{ needs.latest-models-release.outputs.models_tag }}
+      openapiart_ref: rpclogger-builder
+      dry_run: false
+      # Models releases can contain defaults rejected by the final OpenAPI
+      # validator; this is the documented, narrow bypass for that condition.
+      skip_openapi_validation: true
+    secrets: inherit

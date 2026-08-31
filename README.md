@@ -29,6 +29,13 @@ tests, then uploads the resulting `snappi`, `gosnappi`, requirements, and
 provenance as a workflow artifact. It does not commit, tag, or create a
 release. Set `dry_run` to `false` only after reviewing that run.
 
+`Poll Models releases` runs daily at 09:17 UTC (and can also be run manually).
+It queries the latest non-prerelease Models release and, when its exact tag is
+not already present in this repository, performs the real release generation.
+It uses the `rpclogger-builder` branch head and enables the documented narrow
+OpenAPI-validation bypass. Scheduled workflows must remain on `main` and need
+the repository's Actions workflow permission set to **Read and write**.
+
 Set `skip_openapi_validation` only when a Models release fails OpenAPIArt's
 final `openapi_spec_validator` check and you intentionally want to generate it
 anyway. This bypasses that one check only; OpenAPIArt's other bundling checks

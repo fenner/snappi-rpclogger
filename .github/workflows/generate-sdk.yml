@@ -43,6 +43,8 @@ jobs:
           [[ "$MODELS_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]] || { echo "models_tag must look like v1.61.0" >&2; exit 2; }
           git fetch --tags origin
           ! git rev-parse -q --verify "refs/tags/$MODELS_TAG" >/dev/null || { echo "Tag $MODELS_TAG already exists" >&2; exit 1; }
+          go_module_tag="gosnappi/$MODELS_TAG"
+          ! git rev-parse -q --verify "refs/tags/$go_module_tag" >/dev/null || { echo "Go module tag $go_module_tag already exists" >&2; exit 1; }
           release_branch="rpclogger-$MODELS_TAG"
           ! git ls-remote --exit-code --heads origin "$release_branch" >/dev/null || { echo "Branch $release_branch already exists" >&2; exit 1; }
       - uses: actions/setup-python@v7
@@ -94,10 +96,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           release_branch="rpclogger-$MODELS_TAG"
           git switch --orphan "$release_branch"
-          git add gosnappi snappi requirements.txt build-info.json
+          # The Python import smoke test creates bytecode before this commit.
+          git add gosnappi snappi requirements.txt build-info.json \
+            ':(exclude)**/__pycache__/**' \
+            ':(exclude)**/*.py[cod]'
           git commit -m "Generate RPC logger SDK for $MODELS_TAG"
           git tag --annotate "$MODELS_TAG" --message "RPC logger SDK for models $MODELS_TAG"
-          git push --atomic origin "HEAD:refs/heads/$release_branch" "refs/tags/$MODELS_TAG"
+          git tag --annotate "gosnappi/$MODELS_TAG" --message "Go module for RPC logger SDK $MODELS_TAG"
+          git push --atomic origin "HEAD:refs/heads/$release_branch" "refs/tags/$MODELS_TAG" "refs/tags/gosnappi/$MODELS_TAG"
       - name: Publish GitHub release
         if: inputs.dry_run == false
         env:
