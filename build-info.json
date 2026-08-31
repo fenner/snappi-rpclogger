@@ -1,0 +1,14 @@
+{
+  "models_repository": "open-traffic-generator/models",
+  "models_tag": "v1.59.0",
+  "openapi_asset_url": "https://github.com/open-traffic-generator/models/releases/download/v1.59.0/openapi.yaml",
+  "openapi_sha256": "a3260152d1942c2ac169c83de4d1360267589d3f35f57c49217399d305f538c1",
+  "openapi_validation_skipped": true,
+  "openapiart_repository": "fenner/openapiart",
+  "openapiart_source": "github",
+  "openapiart_ref": "rpclogger-builder",
+  "openapiart_commit": "af753fd169c28aaf253086db2a813cad1b74419c",
+  "go_module": "github.com/open-traffic-generator/snappi/gosnappi",
+  "builder_commit": "be2a45b4570a6c1c374fa6ce28e37383e4c75444",
+  "generated_at": "2026-08-31T00:21:50+00:00"
+}
