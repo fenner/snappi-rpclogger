@@ -28,6 +28,8 @@ jobs:
     # OpenApiArt's whole-module goimports pass can consume more than 60 CPU
     # minutes for a full Models release; retain the hosted-runner maximum.
     timeout-minutes: 360
+    env:
+      PYTHONUNBUFFERED: "1"
     concurrency:
       group: snappi-rpclogger-release-${{ inputs.models_tag }}
       cancel-in-progress: false
@@ -52,7 +54,10 @@ jobs:
           python-version: "3.11"
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.25.x"
+          go-version: "1.26.x"
+      - name: Allow Go toolchain upgrades
+        # setup-go exports GOTOOLCHAIN=local, overriding the job environment.
+        run: echo "GOTOOLCHAIN=auto" >> "$GITHUB_ENV"
       - name: Install generator prerequisites
         run: |
           sudo apt-get update
@@ -65,12 +70,13 @@ jobs:
         env:
           SKIP_OPENAPI_VALIDATION: ${{ inputs.skip_openapi_validation }}
         run: |
+          set -o pipefail
           python -m pip install --upgrade pip
           arguments=()
           if [[ "$SKIP_OPENAPI_VALIDATION" == true ]]; then
             arguments+=(--skip-openapi-validation)
           fi
-          python scripts/generate.py --models-tag "${{ inputs.models_tag }}" --openapiart-ref "${{ inputs.openapiart_ref }}" "${arguments[@]}"
+          python -u scripts/generate.py --models-tag "${{ inputs.models_tag }}" --openapiart-ref "${{ inputs.openapiart_ref }}" "${arguments[@]}" 2>&1 | tee generation.log
       - name: Test generated Go module
         run: go -C gosnappi test ./...
       - name: Test generated Python package
@@ -110,3 +116,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           MODELS_TAG: ${{ inputs.models_tag }}
         run: gh release create "$MODELS_TAG" --title "$MODELS_TAG" --generate-notes
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: generation-failure-${{ inputs.models_tag }}
+          include-hidden-files: true
+          path: |
+            gosnappi
+            snappi
+            artifacts/snappi
+            artifacts/requirements.txt
+            requirements.txt
+            build-info.json
+            .build/openapi.yaml
+            generation.log

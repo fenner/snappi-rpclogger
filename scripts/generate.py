@@ -139,6 +139,24 @@ def main() -> None:
     if python_dir.exists():
         shutil.rmtree(python_dir)
 
+    # Save the inputs before generation so failed builds retain provenance too.
+    metadata = {
+        "models_repository": MODELS_REPOSITORY,
+        "models_tag": args.models_tag,
+        "openapi_asset_url": asset_url,
+        "openapi_sha256": sha256(openapi),
+        "openapi_validation_skipped": args.skip_openapi_validation,
+        "openapiart_repository": "fenner/openapiart",
+        "openapiart_source": openapiart_source,
+        "openapiart_ref": openapiart_ref,
+        "openapiart_commit": openapiart_commit,
+        "go_module": GO_MODULE,
+        "builder_commit": git_commit_or_none(root),
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+    }
+    build_info = root / "build-info.json"
+    build_info.write_text(json.dumps(metadata, indent=2) + "\n")
+
     version = args.models_tag.removeprefix("v")
     art = openapiart.OpenApiArt(
         api_files=[str(openapi)], protobuf_name="otg", artifact_dir=str(artifact_dir),
@@ -154,24 +172,14 @@ def main() -> None:
     ).GenerateGoServer(
         module_path=GO_MODULE, models_prefix="gosnappi", models_path=GO_MODULE,
     ).GoTidy(relative_package_dir="gosnappi")
+    # OpenAPIArt ignores go mod tidy's exit status. Repeat it with a checked
+    # call so dependency or toolchain failures make generation fail too.
+    subprocess.check_call(["go", "mod", "tidy"], cwd=generated_dir)
+    # Run inside the module to record any toolchain selected by GOTOOLCHAIN=auto.
+    metadata["go_version"] = run("go", "version", cwd=generated_dir)
+    build_info.write_text(json.dumps(metadata, indent=2) + "\n")
     shutil.copytree(artifact_dir / "snappi", python_dir)
     shutil.copyfile(artifact_dir / "requirements.txt", root / "requirements.txt")
-
-    metadata = {
-        "models_repository": MODELS_REPOSITORY,
-        "models_tag": args.models_tag,
-        "openapi_asset_url": asset_url,
-        "openapi_sha256": sha256(openapi),
-        "openapi_validation_skipped": args.skip_openapi_validation,
-        "openapiart_repository": "fenner/openapiart",
-        "openapiart_source": openapiart_source,
-        "openapiart_ref": openapiart_ref,
-        "openapiart_commit": openapiart_commit,
-        "go_module": GO_MODULE,
-        "builder_commit": git_commit_or_none(root),
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-    }
-    (root / "build-info.json").write_text(json.dumps(metadata, indent=2) + "\n")
 
 
 if __name__ == "__main__":

@@ -45,6 +45,12 @@ and the generated SDK tests still run. The exception is recorded in
 Every generated release contains `build-info.json`, including the model asset
 digest and the exact resolved OpenAPIArt commit. The branch head is intentionally
 used for new builds; its recorded SHA makes each completed release reproducible.
+Completed builds also record the Go toolchain used inside the generated module.
+CI and the local-test image start with Go 1.26 and set `GOTOOLCHAIN=auto` so
+upstream dependencies can select a newer toolchain. Failed CI runs upload
+generated files, available provenance, the model specification, and the
+generation log as diagnostic artifacts. Dependency resolution failures are
+fatal even when OpenAPIArt ignores its own `go mod tidy` exit status.
 
 `Publish tagged release` publishes matching tags created outside the generator.
 The generator itself creates the release because a tag pushed with the default
@@ -53,7 +59,8 @@ Actions `GITHUB_TOKEN` does not trigger another workflow.
 For a local dry run (Python, Go, `protoc`, and `git` required):
 
 ```bash
-python3 scripts/generate.py --models-tag v1.61.0
+export GOTOOLCHAIN=auto
+python3 -u scripts/generate.py --models-tag v1.61.0
 python -m pip install -r requirements.txt
 python -c 'import snappi'
 go -C gosnappi test ./...
@@ -61,7 +68,7 @@ go -C gosnappi test ./...
 
 Run this in a disposable clone or Git worktree: generation replaces the local
 `snappi/` and `gosnappi/` directories. A container is also suitable; it needs
-Python 3.11+, Go 1.25+, `protoc`, and `git`, with network access to GitHub and
+Python 3.11+, Go 1.26+, `protoc`, and `git`, with network access to GitHub and
 the Go module proxy. The builder deliberately skips OpenAPIArt's `proto_doc/`
 side effect because upstream does not publish that documentation either.
 

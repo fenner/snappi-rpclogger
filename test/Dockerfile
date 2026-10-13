@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.25-bookworm
+FROM golang:1.26-bookworm
+
+ENV GOTOOLCHAIN=auto
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
