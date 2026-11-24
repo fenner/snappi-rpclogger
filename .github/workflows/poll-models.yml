@@ -19,9 +19,10 @@ jobs:
       - name: Get latest upstream Models release
         id: latest
         env:
+          GH_TOKEN: ${{ github.token }}
           UPSTREAM_RELEASE_API: https://api.github.com/repos/open-traffic-generator/models/releases/latest
         run: |
-          models_tag="$(curl --fail --silent --show-error --location "$UPSTREAM_RELEASE_API" | jq --raw-output '.tag_name')"
+          models_tag="$(gh api "$UPSTREAM_RELEASE_API" --jq '.tag_name')"
           [[ "$models_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]] || { echo "Unexpected upstream release tag: $models_tag" >&2; exit 1; }
           echo "models_tag=$models_tag" >> "$GITHUB_OUTPUT"
       - name: Check whether the tag is already generated
