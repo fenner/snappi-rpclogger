@@ -1,0 +1,624 @@
+package gosnappi
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/ghodss/yaml"
+	otg "github.com/open-traffic-generator/snappi/gosnappi/otg"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+)
+
+// ***** FlowCfmSelectOpCode *****
+type flowCfmSelectOpCode struct {
+	validation
+	obj          *otg.FlowCfmSelectOpCode
+	marshaller   marshalFlowCfmSelectOpCode
+	unMarshaller unMarshalFlowCfmSelectOpCode
+	ccmHolder    FlowCfmCcm
+	lbmHolder    FlowCfmLbm
+	lbrHolder    FlowCfmLbr
+	dmmHolder    FlowCfmDmm
+	dmrHolder    FlowCfmDmr
+}
+
+func NewFlowCfmSelectOpCode() FlowCfmSelectOpCode {
+	obj := flowCfmSelectOpCode{obj: &otg.FlowCfmSelectOpCode{}}
+	obj.setDefault()
+	return &obj
+}
+
+func (obj *flowCfmSelectOpCode) msg() *otg.FlowCfmSelectOpCode {
+	return obj.obj
+}
+
+func (obj *flowCfmSelectOpCode) setMsg(msg *otg.FlowCfmSelectOpCode) FlowCfmSelectOpCode {
+	obj.setNil()
+	proto.Merge(obj.obj, msg)
+	return obj
+}
+
+type marshalflowCfmSelectOpCode struct {
+	obj *flowCfmSelectOpCode
+}
+
+type marshalFlowCfmSelectOpCode interface {
+	// ToProto marshals FlowCfmSelectOpCode to protobuf object *otg.FlowCfmSelectOpCode
+	ToProto() (*otg.FlowCfmSelectOpCode, error)
+	// ToPbText marshals FlowCfmSelectOpCode to protobuf text
+	ToPbText() (string, error)
+	// ToYaml marshals FlowCfmSelectOpCode to YAML text
+	ToYaml() (string, error)
+	// ToJson marshals FlowCfmSelectOpCode to JSON text
+	ToJson() (string, error)
+}
+
+type unMarshalflowCfmSelectOpCode struct {
+	obj *flowCfmSelectOpCode
+}
+
+type unMarshalFlowCfmSelectOpCode interface {
+	// FromProto unmarshals FlowCfmSelectOpCode from protobuf object *otg.FlowCfmSelectOpCode
+	FromProto(msg *otg.FlowCfmSelectOpCode) (FlowCfmSelectOpCode, error)
+	// FromPbText unmarshals FlowCfmSelectOpCode from protobuf text
+	FromPbText(value string) error
+	// FromYaml unmarshals FlowCfmSelectOpCode from YAML text
+	FromYaml(value string) error
+	// FromJson unmarshals FlowCfmSelectOpCode from JSON text
+	FromJson(value string) error
+}
+
+func (obj *flowCfmSelectOpCode) Marshal() marshalFlowCfmSelectOpCode {
+	if obj.marshaller == nil {
+		obj.marshaller = &marshalflowCfmSelectOpCode{obj: obj}
+	}
+	return obj.marshaller
+}
+
+func (obj *flowCfmSelectOpCode) Unmarshal() unMarshalFlowCfmSelectOpCode {
+	if obj.unMarshaller == nil {
+		obj.unMarshaller = &unMarshalflowCfmSelectOpCode{obj: obj}
+	}
+	return obj.unMarshaller
+}
+
+func (m *marshalflowCfmSelectOpCode) ToProto() (*otg.FlowCfmSelectOpCode, error) {
+	err := m.obj.validateToAndFrom()
+	if err != nil {
+		return nil, err
+	}
+	return m.obj.msg(), nil
+}
+
+func (m *unMarshalflowCfmSelectOpCode) FromProto(msg *otg.FlowCfmSelectOpCode) (FlowCfmSelectOpCode, error) {
+	newObj := m.obj.setMsg(msg)
+	err := newObj.validateToAndFrom()
+	if err != nil {
+		return nil, err
+	}
+	return newObj, nil
+}
+
+func (m *marshalflowCfmSelectOpCode) ToPbText() (string, error) {
+	vErr := m.obj.validateToAndFrom()
+	if vErr != nil {
+		return "", vErr
+	}
+	protoMarshal, err := proto.Marshal(m.obj.msg())
+	if err != nil {
+		return "", err
+	}
+	return string(protoMarshal), nil
+}
+
+func (m *unMarshalflowCfmSelectOpCode) FromPbText(value string) error {
+	retObj := proto.Unmarshal([]byte(value), m.obj.msg())
+	if retObj != nil {
+		return retObj
+	}
+	m.obj.setNil()
+	vErr := m.obj.validateToAndFrom()
+	if vErr != nil {
+		return vErr
+	}
+	return retObj
+}
+
+func (m *marshalflowCfmSelectOpCode) ToYaml() (string, error) {
+	vErr := m.obj.validateToAndFrom()
+	if vErr != nil {
+		return "", vErr
+	}
+	opts := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		AllowPartial:    true,
+		EmitUnpopulated: false,
+	}
+	data, err := opts.Marshal(m.obj.msg())
+	if err != nil {
+		return "", err
+	}
+	data, err = yaml.JSONToYAML(data)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (m *unMarshalflowCfmSelectOpCode) FromYaml(value string) error {
+	if value == "" {
+		value = "{}"
+	}
+	data, err := yaml.YAMLToJSON([]byte(value))
+	if err != nil {
+		return err
+	}
+	opts := protojson.UnmarshalOptions{
+		AllowPartial:   true,
+		DiscardUnknown: false,
+	}
+	uError := opts.Unmarshal([]byte(data), m.obj.msg())
+	if uError != nil {
+		return fmt.Errorf("unmarshal error %s", strings.Replace(
+			uError.Error(), "\u00a0", " ", -1)[7:])
+	}
+	m.obj.setNil()
+	vErr := m.obj.validateToAndFrom()
+	if vErr != nil {
+		return vErr
+	}
+	return nil
+}
+
+func (m *marshalflowCfmSelectOpCode) ToJson() (string, error) {
+	vErr := m.obj.validateToAndFrom()
+	if vErr != nil {
+		return "", vErr
+	}
+	opts := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		AllowPartial:    true,
+		EmitUnpopulated: false,
+		Indent:          "  ",
+	}
+	data, err := opts.Marshal(m.obj.msg())
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (m *unMarshalflowCfmSelectOpCode) FromJson(value string) error {
+	opts := protojson.UnmarshalOptions{
+		AllowPartial:   true,
+		DiscardUnknown: false,
+	}
+	if value == "" {
+		value = "{}"
+	}
+	uError := opts.Unmarshal([]byte(value), m.obj.msg())
+	if uError != nil {
+		return fmt.Errorf("unmarshal error %s", strings.Replace(
+			uError.Error(), "\u00a0", " ", -1)[7:])
+	}
+	m.obj.setNil()
+	err := m.obj.validateToAndFrom()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *flowCfmSelectOpCode) validateToAndFrom() error {
+	// emptyVars()
+	obj.validateObj(&obj.validation, true)
+	return obj.validationResult()
+}
+
+func (obj *flowCfmSelectOpCode) validate() error {
+	// emptyVars()
+	obj.validateObj(&obj.validation, false)
+	return obj.validationResult()
+}
+
+func (obj *flowCfmSelectOpCode) String() string {
+	str, err := obj.Marshal().ToYaml()
+	if err != nil {
+		return err.Error()
+	}
+	return str
+}
+
+func (obj *flowCfmSelectOpCode) Clone() (FlowCfmSelectOpCode, error) {
+	vErr := obj.validate()
+	if vErr != nil {
+		return nil, vErr
+	}
+	newObj := NewFlowCfmSelectOpCode()
+	data, err := proto.Marshal(obj.msg())
+	if err != nil {
+		return nil, err
+	}
+	pbErr := proto.Unmarshal(data, newObj.msg())
+	if pbErr != nil {
+		return nil, pbErr
+	}
+	return newObj, nil
+}
+
+func (obj *flowCfmSelectOpCode) setNil() {
+	obj.ccmHolder = nil
+	obj.lbmHolder = nil
+	obj.lbrHolder = nil
+	obj.dmmHolder = nil
+	obj.dmrHolder = nil
+	obj.validationErrors = nil
+	obj.warnings = nil
+	obj.constraints = make(map[string]map[string]Constraints)
+}
+
+// FlowCfmSelectOpCode is select the CFM PDU. The OpCode byte in the CFM common header is set automatically from the choice: ccm 1, lbr 2, lbm 3 (IEEE 802.1Q-2018 Clause 21), dmr 46 and dmm 47 (ITU-T G.8013/Y.1731 clause 9.15). OpCodes 1-31 are assigned by IEEE 802.1 and 32-63 by ITU-T G.8013/Y.1731.
+type FlowCfmSelectOpCode interface {
+	Validation
+	// msg marshals FlowCfmSelectOpCode to protobuf object *otg.FlowCfmSelectOpCode
+	// and doesn't set defaults
+	msg() *otg.FlowCfmSelectOpCode
+	// setMsg unmarshals FlowCfmSelectOpCode from protobuf object *otg.FlowCfmSelectOpCode
+	// and doesn't set defaults
+	setMsg(*otg.FlowCfmSelectOpCode) FlowCfmSelectOpCode
+	// provides marshal interface
+	Marshal() marshalFlowCfmSelectOpCode
+	// provides unmarshal interface
+	Unmarshal() unMarshalFlowCfmSelectOpCode
+	// validate validates FlowCfmSelectOpCode
+	validate() error
+	// A stringer function
+	String() string
+	// Clones the object
+	Clone() (FlowCfmSelectOpCode, error)
+	validateToAndFrom() error
+	validateObj(vObj *validation, set_default bool)
+	setDefault()
+	// Choice returns FlowCfmSelectOpCodeChoiceEnum, set in FlowCfmSelectOpCode
+	Choice() FlowCfmSelectOpCodeChoiceEnum
+	// setChoice assigns FlowCfmSelectOpCodeChoiceEnum provided by user to FlowCfmSelectOpCode
+	setChoice(value FlowCfmSelectOpCodeChoiceEnum) FlowCfmSelectOpCode
+	// HasChoice checks if Choice has been set in FlowCfmSelectOpCode
+	HasChoice() bool
+	// Ccm returns FlowCfmCcm, set in FlowCfmSelectOpCode.
+	// FlowCfmCcm is cCM is a multicast PDU used to detect continuity and configuration errors within a Maintenance Association (MA). As defined in IEEE 802.1Q-2018 Section 12.14.6.
+	Ccm() FlowCfmCcm
+	// SetCcm assigns FlowCfmCcm provided by user to FlowCfmSelectOpCode.
+	// FlowCfmCcm is cCM is a multicast PDU used to detect continuity and configuration errors within a Maintenance Association (MA). As defined in IEEE 802.1Q-2018 Section 12.14.6.
+	SetCcm(value FlowCfmCcm) FlowCfmSelectOpCode
+	// HasCcm checks if Ccm has been set in FlowCfmSelectOpCode
+	HasCcm() bool
+	// Lbm returns FlowCfmLbm, set in FlowCfmSelectOpCode.
+	// FlowCfmLbm is loopback Message (LBM) is a diagnostic frame used to verify connectivity between Maintenance End Points (MEPs) and Maintenance Intermediate Points (MIPs). LBM flag bits are reserved and set to zero.
+	Lbm() FlowCfmLbm
+	// SetLbm assigns FlowCfmLbm provided by user to FlowCfmSelectOpCode.
+	// FlowCfmLbm is loopback Message (LBM) is a diagnostic frame used to verify connectivity between Maintenance End Points (MEPs) and Maintenance Intermediate Points (MIPs). LBM flag bits are reserved and set to zero.
+	SetLbm(value FlowCfmLbm) FlowCfmSelectOpCode
+	// HasLbm checks if Lbm has been set in FlowCfmSelectOpCode
+	HasLbm() bool
+	// Lbr returns FlowCfmLbr, set in FlowCfmSelectOpCode.
+	// FlowCfmLbr is loopback Reply (LBR) messages are unicast frames sent by a Maintenance Association End Point (MEP) or Intermediate Point (MIP) to a source MEP in response to a Loopback Message (LBM). LBR flag bits are reserved and set to zero.
+	Lbr() FlowCfmLbr
+	// SetLbr assigns FlowCfmLbr provided by user to FlowCfmSelectOpCode.
+	// FlowCfmLbr is loopback Reply (LBR) messages are unicast frames sent by a Maintenance Association End Point (MEP) or Intermediate Point (MIP) to a source MEP in response to a Loopback Message (LBM). LBR flag bits are reserved and set to zero.
+	SetLbr(value FlowCfmLbr) FlowCfmSelectOpCode
+	// HasLbr checks if Lbr has been set in FlowCfmSelectOpCode
+	HasLbr() bool
+	// Dmm returns FlowCfmDmm, set in FlowCfmSelectOpCode.
+	// FlowCfmDmm is delay Measurement Message (DMM, OpCode 47) is sent by a MEP to a peer MEP to measure two-way frame delay and frame delay variation (ITU-T G.8013/Y.1731 clause 8.2, PDU format clause 9.15). The peer answers with a Delay Measurement Reply (DMR, OpCode 46). One-way delay uses the separate 1DM PDU (OpCode 45). The implementation sets OpCode 47 and TLV Offset 32 in the CFM common header.
+	// A conforming DMM is sent in an Ethernet frame with EtherType 0x8902, normally to the unicast MAC address of the peer MEP; set both in the Ethernet header. RFC-style requirements (MUST / MUST NOT) described for this PDU apply to a conforming frame. The model does not enforce them, so any value the fields can encode may be configured for conformance and negative testing.
+	Dmm() FlowCfmDmm
+	// SetDmm assigns FlowCfmDmm provided by user to FlowCfmSelectOpCode.
+	// FlowCfmDmm is delay Measurement Message (DMM, OpCode 47) is sent by a MEP to a peer MEP to measure two-way frame delay and frame delay variation (ITU-T G.8013/Y.1731 clause 8.2, PDU format clause 9.15). The peer answers with a Delay Measurement Reply (DMR, OpCode 46). One-way delay uses the separate 1DM PDU (OpCode 45). The implementation sets OpCode 47 and TLV Offset 32 in the CFM common header.
+	// A conforming DMM is sent in an Ethernet frame with EtherType 0x8902, normally to the unicast MAC address of the peer MEP; set both in the Ethernet header. RFC-style requirements (MUST / MUST NOT) described for this PDU apply to a conforming frame. The model does not enforce them, so any value the fields can encode may be configured for conformance and negative testing.
+	SetDmm(value FlowCfmDmm) FlowCfmSelectOpCode
+	// HasDmm checks if Dmm has been set in FlowCfmSelectOpCode
+	HasDmm() bool
+	// Dmr returns FlowCfmDmr, set in FlowCfmSelectOpCode.
+	// FlowCfmDmr is delay Measurement Reply (DMR, OpCode 46) is sent by a MEP in reply to a Delay Measurement Message (DMM, OpCode 47) (ITU-T G.8013/Y.1731 clause 8.2, PDU format clause 9.16). The implementation sets OpCode 46 and TLV Offset 32 in the CFM common header.
+	// A conforming DMR is sent in an Ethernet frame with EtherType 0x8902 to the unicast MAC address of the MEP that sent the DMM; set both in the Ethernet header. All fields are sent as configured: a DMR flow does not answer received DMMs, so it is for testing how a DUT that sends DMMs handles replies with known timestamps. RFC-style requirements (MUST / MUST NOT) described for this PDU apply to a conforming frame. The model does not enforce them, so any value the fields can encode may be configured for conformance and negative testing.
+	Dmr() FlowCfmDmr
+	// SetDmr assigns FlowCfmDmr provided by user to FlowCfmSelectOpCode.
+	// FlowCfmDmr is delay Measurement Reply (DMR, OpCode 46) is sent by a MEP in reply to a Delay Measurement Message (DMM, OpCode 47) (ITU-T G.8013/Y.1731 clause 8.2, PDU format clause 9.16). The implementation sets OpCode 46 and TLV Offset 32 in the CFM common header.
+	// A conforming DMR is sent in an Ethernet frame with EtherType 0x8902 to the unicast MAC address of the MEP that sent the DMM; set both in the Ethernet header. All fields are sent as configured: a DMR flow does not answer received DMMs, so it is for testing how a DUT that sends DMMs handles replies with known timestamps. RFC-style requirements (MUST / MUST NOT) described for this PDU apply to a conforming frame. The model does not enforce them, so any value the fields can encode may be configured for conformance and negative testing.
+	SetDmr(value FlowCfmDmr) FlowCfmSelectOpCode
+	// HasDmr checks if Dmr has been set in FlowCfmSelectOpCode
+	HasDmr() bool
+	setNil()
+}
+
+type FlowCfmSelectOpCodeChoiceEnum string
+
+// Enum of Choice on FlowCfmSelectOpCode
+var FlowCfmSelectOpCodeChoice = struct {
+	CCM FlowCfmSelectOpCodeChoiceEnum
+	LBM FlowCfmSelectOpCodeChoiceEnum
+	LBR FlowCfmSelectOpCodeChoiceEnum
+	DMM FlowCfmSelectOpCodeChoiceEnum
+	DMR FlowCfmSelectOpCodeChoiceEnum
+}{
+	CCM: FlowCfmSelectOpCodeChoiceEnum("ccm"),
+	LBM: FlowCfmSelectOpCodeChoiceEnum("lbm"),
+	LBR: FlowCfmSelectOpCodeChoiceEnum("lbr"),
+	DMM: FlowCfmSelectOpCodeChoiceEnum("dmm"),
+	DMR: FlowCfmSelectOpCodeChoiceEnum("dmr"),
+}
+
+func (obj *flowCfmSelectOpCode) Choice() FlowCfmSelectOpCodeChoiceEnum {
+	return FlowCfmSelectOpCodeChoiceEnum(obj.obj.Choice.Enum().String())
+}
+
+// description is TBD
+// Choice returns a string
+func (obj *flowCfmSelectOpCode) HasChoice() bool {
+	return obj.obj.Choice != nil
+}
+
+func (obj *flowCfmSelectOpCode) setChoice(value FlowCfmSelectOpCodeChoiceEnum) FlowCfmSelectOpCode {
+	intValue, ok := otg.FlowCfmSelectOpCode_Choice_Enum_value[string(value)]
+	if !ok {
+		obj.validationErrors = append(obj.validationErrors, fmt.Sprintf(
+			"%s is not a valid choice on FlowCfmSelectOpCodeChoiceEnum", string(value)))
+		return obj
+	}
+	enumValue := otg.FlowCfmSelectOpCode_Choice_Enum(intValue)
+	obj.obj.Choice = &enumValue
+	obj.obj.Dmr = nil
+	obj.dmrHolder = nil
+	obj.obj.Dmm = nil
+	obj.dmmHolder = nil
+	obj.obj.Lbr = nil
+	obj.lbrHolder = nil
+	obj.obj.Lbm = nil
+	obj.lbmHolder = nil
+	obj.obj.Ccm = nil
+	obj.ccmHolder = nil
+
+	if value == FlowCfmSelectOpCodeChoice.CCM {
+		obj.obj.Ccm = NewFlowCfmCcm().msg()
+	}
+
+	if value == FlowCfmSelectOpCodeChoice.LBM {
+		obj.obj.Lbm = NewFlowCfmLbm().msg()
+	}
+
+	if value == FlowCfmSelectOpCodeChoice.LBR {
+		obj.obj.Lbr = NewFlowCfmLbr().msg()
+	}
+
+	if value == FlowCfmSelectOpCodeChoice.DMM {
+		obj.obj.Dmm = NewFlowCfmDmm().msg()
+	}
+
+	if value == FlowCfmSelectOpCodeChoice.DMR {
+		obj.obj.Dmr = NewFlowCfmDmr().msg()
+	}
+
+	return obj
+}
+
+// description is TBD
+// Ccm returns a FlowCfmCcm
+func (obj *flowCfmSelectOpCode) Ccm() FlowCfmCcm {
+	if obj.obj.Ccm == nil {
+		obj.setChoice(FlowCfmSelectOpCodeChoice.CCM)
+	}
+	if obj.ccmHolder == nil {
+		obj.ccmHolder = &flowCfmCcm{obj: obj.obj.Ccm}
+	}
+	return obj.ccmHolder
+}
+
+// description is TBD
+// Ccm returns a FlowCfmCcm
+func (obj *flowCfmSelectOpCode) HasCcm() bool {
+	return obj.obj.Ccm != nil
+}
+
+// description is TBD
+// SetCcm sets the FlowCfmCcm value in the FlowCfmSelectOpCode object
+func (obj *flowCfmSelectOpCode) SetCcm(value FlowCfmCcm) FlowCfmSelectOpCode {
+	obj.setChoice(FlowCfmSelectOpCodeChoice.CCM)
+	obj.ccmHolder = nil
+	obj.obj.Ccm = value.msg()
+
+	return obj
+}
+
+// description is TBD
+// Lbm returns a FlowCfmLbm
+func (obj *flowCfmSelectOpCode) Lbm() FlowCfmLbm {
+	if obj.obj.Lbm == nil {
+		obj.setChoice(FlowCfmSelectOpCodeChoice.LBM)
+	}
+	if obj.lbmHolder == nil {
+		obj.lbmHolder = &flowCfmLbm{obj: obj.obj.Lbm}
+	}
+	return obj.lbmHolder
+}
+
+// description is TBD
+// Lbm returns a FlowCfmLbm
+func (obj *flowCfmSelectOpCode) HasLbm() bool {
+	return obj.obj.Lbm != nil
+}
+
+// description is TBD
+// SetLbm sets the FlowCfmLbm value in the FlowCfmSelectOpCode object
+func (obj *flowCfmSelectOpCode) SetLbm(value FlowCfmLbm) FlowCfmSelectOpCode {
+	obj.setChoice(FlowCfmSelectOpCodeChoice.LBM)
+	obj.lbmHolder = nil
+	obj.obj.Lbm = value.msg()
+
+	return obj
+}
+
+// description is TBD
+// Lbr returns a FlowCfmLbr
+func (obj *flowCfmSelectOpCode) Lbr() FlowCfmLbr {
+	if obj.obj.Lbr == nil {
+		obj.setChoice(FlowCfmSelectOpCodeChoice.LBR)
+	}
+	if obj.lbrHolder == nil {
+		obj.lbrHolder = &flowCfmLbr{obj: obj.obj.Lbr}
+	}
+	return obj.lbrHolder
+}
+
+// description is TBD
+// Lbr returns a FlowCfmLbr
+func (obj *flowCfmSelectOpCode) HasLbr() bool {
+	return obj.obj.Lbr != nil
+}
+
+// description is TBD
+// SetLbr sets the FlowCfmLbr value in the FlowCfmSelectOpCode object
+func (obj *flowCfmSelectOpCode) SetLbr(value FlowCfmLbr) FlowCfmSelectOpCode {
+	obj.setChoice(FlowCfmSelectOpCodeChoice.LBR)
+	obj.lbrHolder = nil
+	obj.obj.Lbr = value.msg()
+
+	return obj
+}
+
+// description is TBD
+// Dmm returns a FlowCfmDmm
+func (obj *flowCfmSelectOpCode) Dmm() FlowCfmDmm {
+	if obj.obj.Dmm == nil {
+		obj.setChoice(FlowCfmSelectOpCodeChoice.DMM)
+	}
+	if obj.dmmHolder == nil {
+		obj.dmmHolder = &flowCfmDmm{obj: obj.obj.Dmm}
+	}
+	return obj.dmmHolder
+}
+
+// description is TBD
+// Dmm returns a FlowCfmDmm
+func (obj *flowCfmSelectOpCode) HasDmm() bool {
+	return obj.obj.Dmm != nil
+}
+
+// description is TBD
+// SetDmm sets the FlowCfmDmm value in the FlowCfmSelectOpCode object
+func (obj *flowCfmSelectOpCode) SetDmm(value FlowCfmDmm) FlowCfmSelectOpCode {
+	obj.setChoice(FlowCfmSelectOpCodeChoice.DMM)
+	obj.dmmHolder = nil
+	obj.obj.Dmm = value.msg()
+
+	return obj
+}
+
+// description is TBD
+// Dmr returns a FlowCfmDmr
+func (obj *flowCfmSelectOpCode) Dmr() FlowCfmDmr {
+	if obj.obj.Dmr == nil {
+		obj.setChoice(FlowCfmSelectOpCodeChoice.DMR)
+	}
+	if obj.dmrHolder == nil {
+		obj.dmrHolder = &flowCfmDmr{obj: obj.obj.Dmr}
+	}
+	return obj.dmrHolder
+}
+
+// description is TBD
+// Dmr returns a FlowCfmDmr
+func (obj *flowCfmSelectOpCode) HasDmr() bool {
+	return obj.obj.Dmr != nil
+}
+
+// description is TBD
+// SetDmr sets the FlowCfmDmr value in the FlowCfmSelectOpCode object
+func (obj *flowCfmSelectOpCode) SetDmr(value FlowCfmDmr) FlowCfmSelectOpCode {
+	obj.setChoice(FlowCfmSelectOpCodeChoice.DMR)
+	obj.dmrHolder = nil
+	obj.obj.Dmr = value.msg()
+
+	return obj
+}
+
+func (obj *flowCfmSelectOpCode) validateObj(vObj *validation, set_default bool) {
+	if set_default {
+		obj.setDefault()
+	}
+
+	if obj.obj.Ccm != nil {
+
+		obj.Ccm().validateObj(vObj, set_default)
+	}
+
+	if obj.obj.Lbm != nil {
+
+		obj.Lbm().validateObj(vObj, set_default)
+	}
+
+	if obj.obj.Lbr != nil {
+
+		obj.Lbr().validateObj(vObj, set_default)
+	}
+
+	if obj.obj.Dmm != nil {
+
+		obj.Dmm().validateObj(vObj, set_default)
+	}
+
+	if obj.obj.Dmr != nil {
+
+		obj.Dmr().validateObj(vObj, set_default)
+	}
+
+}
+
+func (obj *flowCfmSelectOpCode) setDefault() {
+	var choices_set int = 0
+	var choice FlowCfmSelectOpCodeChoiceEnum
+
+	if obj.obj.Ccm != nil {
+		choices_set += 1
+		choice = FlowCfmSelectOpCodeChoice.CCM
+	}
+
+	if obj.obj.Lbm != nil {
+		choices_set += 1
+		choice = FlowCfmSelectOpCodeChoice.LBM
+	}
+
+	if obj.obj.Lbr != nil {
+		choices_set += 1
+		choice = FlowCfmSelectOpCodeChoice.LBR
+	}
+
+	if obj.obj.Dmm != nil {
+		choices_set += 1
+		choice = FlowCfmSelectOpCodeChoice.DMM
+	}
+
+	if obj.obj.Dmr != nil {
+		choices_set += 1
+		choice = FlowCfmSelectOpCodeChoice.DMR
+	}
+	if choices_set == 0 {
+		if obj.obj.Choice == nil {
+			obj.setChoice(FlowCfmSelectOpCodeChoice.CCM)
+
+		}
+
+	} else if choices_set == 1 && choice != "" {
+		if obj.obj.Choice != nil {
+			if obj.Choice() != choice {
+				obj.validationErrors = append(obj.validationErrors, "choice not matching with property in FlowCfmSelectOpCode")
+			}
+		} else {
+			intVal := otg.FlowCfmSelectOpCode_Choice_Enum_value[string(choice)]
+			enumValue := otg.FlowCfmSelectOpCode_Choice_Enum(intVal)
+			obj.obj.Choice = &enumValue
+		}
+	}
+
+}
